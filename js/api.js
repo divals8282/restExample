@@ -93,7 +93,7 @@ bergApi = {
 			callback(data);
 		});
 	},
-	updateTask:function(taskId,title,description,dueData){
+	updateTask:function(taskId,title,description,dueDate,callback){
 		this.getRequest('task_update','put',{
 			taskId:taskId,
 			userId:this.userId,
@@ -101,15 +101,10 @@ bergApi = {
 			status:'hold',
 			title:title,
 			description:description,
-			dueDate:dueData,
+			dueDate:moment(dueDate).unix(),
 			apiKey:this.key
 		},function(data){
-			if(data.status == "success"){
-				//window.location.href = "http://localhost/restExample/";
-			}
-			else{
-				$('#edit_task_log').html(data.status);
-			}
+			callback(data.status);
 		});
 	},
 	getSingleTask:function(taskId,callback){
@@ -119,7 +114,12 @@ bergApi = {
 			taskId:taskId,
 		},function(data){callback(data)});
 	},
+	changeTaskStatus:function(taskid,callback){
+		this.getRequest('task_changeStatus','put',{
+			apiKey:bergApi.key,
 
+		})
+	},
 	responsableChartCalc:function(allTasks,TaskKey){
 		var statuses = [];
 		var tasksByStatuses = {};

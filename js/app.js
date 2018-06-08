@@ -1,20 +1,18 @@
 App = {
 	signIn:function(){
-		$('document').ready(function(){
-			$('#openModal').trigger('click');
-			$('#signIn_submit').click(function(){
-				var email = $('#signIn_email').val();
-				var password = $('#signIn_password').val()
-				bergApi.signIn(email,password,function(data){
-					if(data.status == 'error'){
-						$('#error_log').html(data.message);
-					}
-					else{
-						localStorage.setItem('userid',data.data['user_id']);
-						localStorage.setItem('key',data.data['api_key']);
-						window.location.href = "http://localhost/restExample";
-					}
-				});
+		$('#openModal').trigger('click');
+		$('#signIn_submit').click(function(){
+			var email = $('#signIn_email').val();
+			var password = $('#signIn_password').val()
+			bergApi.signIn(email,password,function(data){
+				if(data.status == 'error'){
+					$('#error_log').html(data.message);
+				}
+				else{
+					localStorage.setItem('userid',data.data['user_id']);
+					localStorage.setItem('key',data.data['api_key']);
+					window.location.href = "http://localhost/restExample";
+				}
 			});
 		});
 	},
@@ -53,7 +51,7 @@ App = {
 					value['status'],
 					value['description'],
 					value['seen'],
-					value['due_date'],
+					moment.unix(value['due_date']).format('MM/DD/YYYY HH:mm'),
 					'<td><button class="btn btn-primary edit edit_task" data-toggle="modal" data-target="#EditModal" data-taskId="'+ value['task_id'] +'">Edit</button></td>',
 					'<td><button class="btn btn-danger delete" data-taskId="'+ value['task_id'] +'">Delete</button></td>',
 				]).draw().node();
@@ -74,6 +72,7 @@ App = {
 	},
 	addNewTask:function(){
 		$('#add_new_task_submit').bind('click',function(){
+			$('#datepicker_add').datepicker({uiLibrary: 'bootstrap4'});
 			var title = $('#add_new_task_title').val();
 			var description = $('#add_new_task_description').val();
 			var dueDate = parseInt($('#add_new_task_dueDate').val()) * 60000;
@@ -87,12 +86,14 @@ App = {
 	},
 	editTask:function(){
 		$('#table').on('click','.edit_task',function(target){
+			$('#edit_task_dueDate').datepicker({uiLibrary: 'bootstrap4'});
+
 			var taskId = target.currentTarget.dataset.taskid;
 			bergApi.getSingleTask(taskId,function(task){
 				// console.log(task);
 				$('#edit_task_title').val(task.data['title']);
 				$('#edit_task_description').val(task.data['description']);
-				$('#edit_task_dueDate').val(task.data['due_date']);
+				$('#edit_task_dueDate').val(moment.unix(task.data['due_date']).format('MM/DD/YYYY HH:mm'));
 				$('#edit_task_submit').attr('rel',taskId);
 			});
 		})
@@ -102,8 +103,12 @@ App = {
 			var taskId = $('#edit_task_submit').attr('rel');
 			var title = $('#edit_task_title').val()
 			var descr = $('#edit_task_description').val()
-			var dueDate = $('#edit_task_dueDate').val()
-			bergApi.updateTask(taskId,title,descr,dueDate);
+			var dueDate = moment($('#edit_task_dueDate').val()).valueOf();
+			bergApi.updateTask(taskId,title,descr,dueDate,function(status){
+				if(status == "success"){
+					window.location.reload();
+				}
+			});
 		});
 	},
 	userLogout:function() {
