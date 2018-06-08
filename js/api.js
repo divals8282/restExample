@@ -59,13 +59,12 @@ bergApi = {
 		return csfString
 	},
 	getUserTasks:function(callback){
-		console.log(this.userId);
 		this.getRequest('task_getAll','get',{
 			userId:bergApi.userId,
 			apiKey:bergApi.key
 		},function(data){
 			bergApi.responsableChartCalc(data);
-			charts.pieChart('responsable_modal',bergApi.pieChartData);
+			charts.pieChart('responsable_chart',bergApi.pieChartData);
 			bergApi.csfString = bergApi.csfGenerator(data);
 			callback(data);
 			App.downloadcsf('tasks.csv',bergApi.csfString);
@@ -119,6 +118,16 @@ bergApi = {
 			apiKey:bergApi.key,
 
 		})
+	},
+	changeStatus:function(taskId,callback){
+		this.getRequest('task_changeStatus','put',{
+			apiKey:this.key,
+			status:'success',
+			taskId:taskId,
+			userId:this.userId
+		},function(data){
+			callback(data.status);
+		});
 	},
 	responsableChartCalc:function(allTasks,TaskKey){
 		var statuses = [];

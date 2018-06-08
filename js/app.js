@@ -45,16 +45,26 @@ App = {
 		var table = $('#table').DataTable();
 		bergApi.getUserTasks(function(tasks){
 			tasks.data.forEach(function(value,key){
-				table.row.add([
+				var rowColor = '';
+				var success = '';
+				if(value['status'] == 'fail'){rowColor = 'status-fail'}
+				else if(value['status'] == 'hold'){rowColor = 'status-hold'}
+				else if(value['status'] == 'success'){rowColor = 'status-success'}
+				if(value['status'] == "hold"){
+					success = '<td><button class="btn btn-success edit success-task" data-toggle="modal" data-taskId="'+ value['task_id'] +'">Success</button></td>';
+				}
+				var row = table.row.add([
 					value['task_id'],
 					value['title'],
 					value['status'],
 					value['description'],
 					value['seen'],
 					moment.unix(value['due_date']).format('MM/DD/YYYY HH:mm'),
+					success,
 					'<td><button class="btn btn-primary edit edit_task" data-toggle="modal" data-target="#EditModal" data-taskId="'+ value['task_id'] +'">Edit</button></td>',
 					'<td><button class="btn btn-danger delete" data-taskId="'+ value['task_id'] +'">Delete</button></td>',
 				]).draw().node();
+				$(row).addClass(rowColor);
 			});
 		});
 	},
@@ -119,6 +129,16 @@ App = {
 			window.location.href = "http://localhost/restExample/";
 		});
 	},
+	changeStatus:function(){
+		$('#table').on('click','.success-task',function(){
+			var Id = $(this).data('taskid');
+			bergApi.changeStatus(Id,function(status){
+				if(status == 'success'){
+					window.location.reload();
+				}
+			})
+		});
+	},
 	init:function(){
 		var location = window.location.href;
 		if(location.search('login.html') != -1){
@@ -131,6 +151,7 @@ App = {
 		this.addNewTask();
 		this.editTask();
 		this.updateTask();
+		this.changeStatus();
 		this.userLogout();
 		}
 	}

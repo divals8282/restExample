@@ -1,0 +1,12 @@
+.status-fail {
+	background-color:#DD5C5C !important;
+	color:white !important;
+}
+.status-success {
+	background-color:#419941 !important;
+	color:white !important;
+}
+.status-hold{
+	background-color: #7575C5 !important;
+	color:white !important;
+}
